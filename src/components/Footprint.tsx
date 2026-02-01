@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MapPin, ExternalLink, Crown, Sparkles, ShoppingBag, ChevronRight } from "lucide-react";
-import Image from "next/image";
+import { MapPin, Crown, Sparkles, ShoppingBag, ChevronRight } from "lucide-react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export const TheFootprint = () => {
     const [shops, setShops] = useState<any[]>([]);
@@ -12,9 +13,9 @@ export const TheFootprint = () => {
     useEffect(() => {
         const fetchShops = async () => {
             try {
-                const res = await fetch("/api/admin");
-                const data = await res.json();
-                setShops(data.shops || []);
+                const querySnapshot = await getDocs(collection(db, "shops"));
+                const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setShops(data);
             } catch (err) {
                 console.error("Footprint sync error:", err);
             } finally {
@@ -52,13 +53,19 @@ export const TheFootprint = () => {
                         className="min-w-[280px] md:min-w-[380px] snap-center group relative bg-white rounded-[2rem] overflow-hidden border border-brand-gold/10 hover:border-brand-gold/40 transition-all duration-500 shadow-xl"
                     >
                         {/* Visual Asset */}
-                        <div className="relative h-56 w-full">
-                            <Image
-                                src={shop.image}
-                                alt={shop.name}
-                                fill
-                                className={`object-cover transition-transform duration-1000 group-hover:scale-110 ${type === 'live' ? 'opacity-100' : 'opacity-40 grayscale'}`}
-                            />
+                        <div className="relative h-56 w-full bg-gray-100">
+                            {shop.image ? (
+                                <img
+                                    src={shop.image}
+                                    alt={shop.name}
+                                    className={`w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 ${type === 'live' ? 'opacity-100' : 'opacity-40 grayscale'}`}
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-brand-burgundy/5 text-brand-burgundy/20">
+                                    <MapPin size={40} />
+                                </div>
+                            )}
+
                             {type === 'next' && (
                                 <div className="absolute inset-0 bg-brand-burgundy/40 backdrop-blur-[2px] flex items-center justify-center">
                                     <Sparkles className="text-brand-gold animate-pulse" size={32} />
@@ -77,10 +84,20 @@ export const TheFootprint = () => {
                             <div className="flex gap-3">
                                 {type === 'live' ? (
                                     <>
-                                        <a href={shop.mapsLink} target="_blank" className="flex-1 flex items-center justify-center gap-2 py-3 bg-brand-burgundy/5 text-brand-burgundy rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-brand-gold transition-colors">
+                                        <a
+                                            href={shop.mapsLink || "#"}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-brand-burgundy/5 text-brand-burgundy rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-brand-gold transition-colors"
+                                        >
                                             <MapPin size={12} /> Directions
                                         </a>
-                                        <a href={shop.zomato} target="_blank" className="flex-1 flex items-center justify-center gap-2 py-3 bg-brand-burgundy text-brand-ivory rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-brand-gold hover:text-brand-burgundy transition-colors">
+                                        <a
+                                            href={shop.zomato || "#"}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex-1 flex items-center justify-center gap-2 py-3 bg-brand-burgundy text-brand-ivory rounded-xl text-[9px] font-bold uppercase tracking-widest hover:bg-brand-gold hover:text-brand-burgundy transition-colors"
+                                        >
                                             <ShoppingBag size={12} /> Order
                                         </a>
                                     </>
@@ -113,11 +130,17 @@ export const TheFootprint = () => {
                     </div>
                 ) : (
                     <>
-                        <HorizontalRow title="Operational" data={operatingShops} type="live" />
-                        <HorizontalRow title="Coming Soon" data={upcomingShops} type="next" />
+                        {operatingShops.length > 0 && <HorizontalRow title="Operational" data={operatingShops} type="live" />}
+                        {upcomingShops.length > 0 && <HorizontalRow title="Coming Soon" data={upcomingShops} type="next" />}
+
+                        {shops.length === 0 && (
+                            <div className="px-16 text-brand-burgundy/40 text-sm font-bold uppercase tracking-widest">
+                                Network sync in progress... (Add shops via Admin)
+                            </div>
+                        )}
                     </>
                 )}
             </div>
         </section>
     );
-};
+}; 

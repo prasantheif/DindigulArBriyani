@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/Header";
-import { Loader2, Camera, Play, X } from "lucide-react";
+import { Loader2, Play, X, Image as ImageIcon } from "lucide-react";
+// 1. IMPORT FIREBASE
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 const categories = ["ALL", "FOOD", "AMBIENCE", "LEGACY", "CINEMA"];
 
@@ -16,24 +19,15 @@ export default function GalleryPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [galleryRes, videoRes] = await Promise.all([
-                    fetch("/api/gallery"),
-                    fetch("/api/videos")
-                ]);
-                const galleryData = await galleryRes.json();
-                const videoData = await videoRes.json();
-
-                const combined = [
-                    ...(galleryData.images || []).map((img: any) => ({ ...img, type: 'image' })),
-                    ...(videoData.videos || []).map((vid: any) => ({
-                        ...vid,
-                        type: 'video',
-                        category: 'CINEMA'
-                    }))
-                ];
-                setMedia(combined);
-            } catch (err) { console.error(err); }
-            finally { setLoading(false); }
+                // 2. FETCH FROM CLOUD
+                const querySnapshot = await getDocs(collection(db, "gallery"));
+                const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setMedia(data);
+            } catch (err) {
+                console.error("Gallery sync error:", err);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchData();
     }, []);
@@ -66,13 +60,22 @@ export default function GalleryPage() {
                 {loading ? (
                     <div className="flex flex-col items-center py-40">
                         <Loader2 className="animate-spin text-brand-gold mb-4" />
+                        <span className="text-brand-ivory/40 text-[10px] uppercase tracking-widest font-bold">Loading Archive...</span>
                     </div>
                 ) : (
-                    <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-                        {filteredMedia.map((item) => (
-                            <GalleryItem key={item.id} item={item} onOpenVideo={setActiveVideo} />
-                        ))}
-                    </div>
+                    <>
+                        {filteredMedia.length > 0 ? (
+                            <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+                                {filteredMedia.map((item) => (
+                                    <GalleryItem key={item.id} item={item} onOpenVideo={setActiveVideo} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-20 text-brand-ivory/20 font-display text-2xl uppercase">
+                                No memories found in this category.
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -89,14 +92,17 @@ export default function GalleryPage() {
     );
 }
 
-/* ---------------------- GalleryItem: No Thumbnail Edition ---------------------- */
+/* ---------------------- GalleryItem ---------------------- */
 
 const GalleryItem = ({ item, onOpenVideo }: { item: any, onOpenVideo: (url: string) => void }) => {
     return (
         <motion.div
             layout
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             onClick={() => item.type === 'video' ? onOpenVideo(item.url) : null}
-            className="relative group break-inside-avoid rounded-[2rem] overflow-hidden border border-brand-gold/20 bg-brand-burgundy/20 backdrop-blur-sm cursor-pointer"
+            className="relative group break-inside-avoid rounded-[2rem] overflow-hidden border border-brand-gold/20 bg-brand-burgundy/20 backdrop-blur-sm cursor-pointer mb-8"
         >
             {item.type === 'image' ? (
                 <img
@@ -105,7 +111,7 @@ const GalleryItem = ({ item, onOpenVideo }: { item: any, onOpenVideo: (url: stri
                     className="w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
             ) : (
-                <div className="relative aspect-video md:aspect-[4/5] w-full">
+                <div className="relative aspect-video w-full">
                     {/* VIDEO AS PREVIEW: Muted, Autoplay, Looping */}
                     <video
                         src={item.url}
@@ -125,7 +131,7 @@ const GalleryItem = ({ item, onOpenVideo }: { item: any, onOpenVideo: (url: stri
             {/* Global Hover Info Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-brand-burgundy via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-8">
                 <span className="text-brand-gold text-[9px] font-bold uppercase tracking-[0.3em] mb-2">{item.category}</span>
-                <h3 className="text-brand-ivory font-display text-2xl uppercase leading-tight">{item.caption || item.title}</h3>
+                <h3 className="text-brand-ivory font-display text-2xl uppercase leading-tight">{item.caption || "Untitled Moment"}</h3>
             </div>
         </motion.div>
     );

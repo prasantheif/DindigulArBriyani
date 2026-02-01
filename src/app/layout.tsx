@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Cinzel, Lato } from "next/font/google"; // Removed localFont, using Google Fonts as requested
+import { Playfair_Display, Cinzel, Lato } from "next/font/google";
 import "./globals.css";
+// 1. IMPORT THE AUTH PROVIDER
+// Try this if "@/" doesn't work
+import { AuthProvider } from "../components/AuthProvider";
+import { ProspectusProvider } from "@/context/ProspectusContext";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -23,8 +27,6 @@ export const metadata: Metadata = {
   description: "Join the legacy of Dindigul AR Biryani. 18+ years of excellence. Explore exclusive franchise opportunities in the global culinary ecosystem.",
 };
 
-import { ProspectusProvider } from "@/context/ProspectusContext";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,8 +37,11 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${cinzel.variable} ${lato.variable} font-sans antialiased bg-brand-ivory text-brand-burgundy`}
       >
+        {/* 2. WRAP THE APP WITH BOTH PROVIDERS */}
         <ProspectusProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </ProspectusProvider>
       </body>
     </html>

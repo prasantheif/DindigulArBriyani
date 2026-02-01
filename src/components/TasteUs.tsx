@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ShoppingBag, ChevronRight, Crown, Sparkles, MapPin, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 interface Shop {
     id: string;
@@ -22,9 +23,11 @@ export const TasteUs = () => {
     useEffect(() => {
         const fetchShops = async () => {
             try {
-                const res = await fetch("/api/admin");
-                const data = await res.json();
-                const sortedShops = [...(data.shops || [])].sort((a, b) => {
+                const querySnapshot = await getDocs(collection(db, "shops"));
+                const rawData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Shop));
+
+                // Sort: Operational first
+                const sortedShops = rawData.sort((a, b) => {
                     if (a.status === "OPERATIONAL" && b.status !== "OPERATIONAL") return -1;
                     if (a.status !== "OPERATIONAL" && b.status === "OPERATIONAL") return 1;
                     return 0;
@@ -39,7 +42,6 @@ export const TasteUs = () => {
         fetchShops();
     }, []);
 
-    // MOVED the ID and scroll-margin to this wrapper
     return (
         <section id="TasteUs" className="bg-brand-burgundy overflow-hidden scroll-mt-20">
             {loading ? (
@@ -77,12 +79,12 @@ export const TasteUs = () => {
                                     transition={{ duration: 0.8, delay: i * 0.1 }}
                                     className="min-w-[280px] md:min-w-[360px] snap-center bg-brand-ivory border border-brand-gold/10 overflow-hidden shadow-2xl flex flex-col group rounded-[2.5rem]"
                                 >
-                                    <div className="relative h-[200px] md:h-[260px] overflow-hidden">
-                                        <Image
-                                            src={shop.image || "/placeholder.jpg"}
+                                    <div className="relative h-[200px] md:h-[260px] overflow-hidden bg-gray-100">
+                                        {/* FIXED: Using standard img tag for Cloudinary compatibility */}
+                                        <img
+                                            src={shop.image || "https://placehold.co/600x400/800000/FFF?text=Dindigul+AR"}
                                             alt={shop.name}
-                                            fill
-                                            className={`object-cover transition-transform duration-1000 group-hover:scale-110 ${isOperational ? 'opacity-100' : 'opacity-40 grayscale'}`}
+                                            className={`w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 ${isOperational ? 'opacity-100' : 'opacity-40 grayscale'}`}
                                         />
                                         {!isOperational && (
                                             <div className="absolute inset-0 bg-brand-burgundy/60 backdrop-blur-sm flex items-center justify-center">
@@ -102,10 +104,22 @@ export const TasteUs = () => {
                                         <div className="mt-auto flex flex-col gap-3">
                                             {isOperational ? (
                                                 <>
-                                                    <a href={shop.zomato || "#"} target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-center gap-2 py-4 bg-brand-burgundy text-brand-ivory text-[9px] font-bold uppercase tracking-[0.3em] transition-all duration-500 rounded-2xl hover:bg-brand-gold hover:text-brand-burgundy">
+                                                    {/* Linked to Zomato/Ordering URL */}
+                                                    <a
+                                                        href={shop.zomato || "#"}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-full flex items-center justify-center gap-2 py-4 bg-brand-burgundy text-brand-ivory text-[9px] font-bold uppercase tracking-[0.3em] transition-all duration-500 rounded-2xl hover:bg-brand-gold hover:text-brand-burgundy"
+                                                    >
                                                         <ShoppingBag size={12} /> Order Now
                                                     </a>
-                                                    <a href={shop.mapsLink || "#"} target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-center gap-2 py-3 bg-transparent border border-brand-burgundy/10 text-brand-burgundy/50 text-[8px] font-bold uppercase tracking-[0.2em] transition-all hover:border-brand-burgundy hover:text-brand-burgundy rounded-xl">
+                                                    {/* Linked to Google Maps URL */}
+                                                    <a
+                                                        href={shop.mapsLink || "#"}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-full flex items-center justify-center gap-2 py-3 bg-transparent border border-brand-burgundy/10 text-brand-burgundy/50 text-[8px] font-bold uppercase tracking-[0.2em] transition-all hover:border-brand-burgundy hover:text-brand-burgundy rounded-xl"
+                                                    >
                                                         <MapPin size={10} /> View Location
                                                     </a>
                                                 </>

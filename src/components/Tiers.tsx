@@ -120,13 +120,14 @@ export const Tiers = () => {
                             </div>
 
                             <div className="p-8 pt-0">
-                                <button
-                                    onClick={openProspectus}
-                                    className={`w-full flex items-center justify-center gap-3 py-4 font-bold uppercase tracking-widest text-[10px] transition-all duration-500 rounded-lg shadow-lg ${tier.button} hover:brightness-110 active:scale-95`}
-                                >
-                                    Inquire for {tier.name} <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
+    <button
+        onClick={openProspectus}
+        // Added 'hover:scale-105' for the expansion effect
+        className={`w-full flex items-center justify-center gap-3 py-4 font-bold uppercase tracking-widest text-[10px] transition-all duration-500 rounded-lg shadow-lg ${tier.button} hover:bg-brand-gold hover:text-brand-burgundy hover:scale-105 active:scale-95`}
+    >
+        Inquire for {tier.name} <ArrowRight className="w-4 h-4" />
+    </button>
+</div>   
 
                             {/* Inner Specular Highlight */}
                             <div className="absolute inset-0 rounded-[0.7rem] border border-white/10 pointer-events-none z-20" />

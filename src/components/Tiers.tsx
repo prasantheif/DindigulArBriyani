@@ -8,8 +8,8 @@ import Image from "next/image";
 
 const tierData = [
     {
-        name: "Express",
-        sub: "Urban Powerhouse",
+        name: "Express Model",
+        sub: "Urban Power house",
         // TIER 1: Porcelain Ivory
         // Very light, clean start
         theme: "bg-[#F9F5EA] text-brand-burgundy",
@@ -20,7 +20,7 @@ const tierData = [
         features: ["The Entry Level Model", "Take away and self service", "500-800 sq ft", "Seating 15-20 people", "ROI 8-10 months"],
     },
     {
-        name: "Standard",
+        name: "Standard Model",
         sub: "The Heritage Suite",
         // TIER 2: Vintage Cream
         // A distinct step darker, warmer
@@ -32,7 +32,7 @@ const tierData = [
         features: ["The Mid Range Model", "Mini Dine In", "800-1200 Sq.Ft", "Seating 20-30 people", "ROI 10-12 months"],
     },
     {
-        name: "Signature",
+        name: "Signature Model",
         sub: "Imperial Landmark",
         // TIER 3: Dark Sand
         // The bridge between cream and gold
@@ -45,7 +45,7 @@ const tierData = [
         features: ["The Elite Model", "Fine Dine In", "1200-2000 Sq.Ft", "Seating 35-50 people", "ROI 10-12 months"],
     },
     {
-        name: "Premium",
+        name: "Premium Model",
         sub: "Global Flagship",
         // TIER 4: Sovereign Gold
         // The destination. Full Gold background.

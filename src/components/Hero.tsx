@@ -35,11 +35,11 @@ export const Hero = () => {
 
             {/* === BACKGROUND LAYER === */}
             <div className="absolute inset-0 z-0">
-                <video 
-                    autoPlay 
-                    loop 
-                    muted 
-                    playsInline 
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                     className="w-full h-full object-cover scale-[1.05] opacity-60"
                 >
                     <source src="/images/background_video.mp4" type="video/mp4" />
@@ -59,10 +59,12 @@ export const Hero = () => {
                 {/* 1. CENTER BADGE LOGO */}
                 <div className="relative mb-6 md:mb-8">
                     <div className="absolute inset-0 bg-[#C5A059]/20 blur-[50px] rounded-full" />
-                    <img 
-                        src="/logo.png" 
-                        alt="AR Biryani Seal" 
-                        className="relative w-28 h-28 md:w-56 md:h-56 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" 
+                    <img
+                        src="/logo.png"
+                        alt="AR Biryani Seal"
+                        // Changed w-28 h-28 -> w-40 h-40 (mobile)
+                        // Changed md:w-56 md:h-56 -> md:w-80 md:h-80 (desktop)
+                        className="relative w-40 h-40 md:w-80 md:h-80 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
                     />
                 </div>
 
@@ -116,9 +118,9 @@ export const Hero = () => {
 
             {/* === SCROLL INDICATOR === */}
             {/* Z-index increased to 30 to sit ON TOP of the mist */}
-            <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 1.5, duration: 1 }}
                 className="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-brand-burgundy/60 z-30 pointer-events-none"
             >
